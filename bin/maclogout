@@ -7,22 +7,92 @@
 set -euo pipefail
 
 VERSION="1.0.0"
-CONFIG_FILE="/usr/local/etc/maclogout/config"
+CONFIG_FILE="@@HOMEBREW_ETC@@/maclogout/config"
 LOG_FILE="/var/log/maclogout.log"
 
 # ── Flag handling ──────────────────────────────────────
 
-if [[ "${1:-}" == "--version" ]]; then
-    echo "maclogout $VERSION"
-    exit 0
-fi
-
-if [[ "${1:-}" == "--help" ]]; then
+usage() {
     echo "maclogout — force-logout during configured nighttime window"
-    echo "Usage: maclogout [--version|--help]"
+    echo ""
+    echo "Usage:"
+    echo "  maclogout                  Run a check tick (called by daemon)"
+    echo "  maclogout --show           Show current configuration"
+    echo "  maclogout --start <hour>   Set START_HOUR (requires sudo)"
+    echo "  maclogout --end <hour>     Set END_HOUR (requires sudo)"
+    echo "  maclogout --path           Show config file path"
+    echo "  maclogout --version        Print version"
+    echo "  maclogout --help           This help"
+    echo ""
     echo "Config: $CONFIG_FILE"
-    exit 0
-fi
+}
+
+set_config_key() {
+    local key="$1" val="$2"
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "Config file not found: $CONFIG_FILE" >&2
+        exit 1
+    fi
+    tmp=$(mktemp)
+    awk -v k="$key" -v v="$val" '
+        $0 ~ "^[[:space:]]*" k "[[:space:]]*=" { print k "=" v; found=1; next }
+        { print }
+        END { if (!found) print k "=" v }
+    ' "$CONFIG_FILE" > "$tmp"
+    mv "$tmp" "$CONFIG_FILE"
+    echo "$key = $val"
+}
+
+changed=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --version)
+            echo "maclogout $VERSION"
+            exit 0
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        --show)
+            if [[ ! -f "$CONFIG_FILE" ]]; then
+                echo "Config file not found: $CONFIG_FILE" >&2
+                exit 1
+            fi
+            cat "$CONFIG_FILE"
+            exit 0
+            ;;
+        --path)
+            echo "$CONFIG_FILE"
+            exit 0
+            ;;
+        --start)
+            if [[ -z "${2:-}" ]]; then
+                echo "Usage: maclogout --start <0-23>" >&2
+                exit 1
+            fi
+            set_config_key START_HOUR "$2"
+            changed=true
+            shift 2
+            ;;
+        --end)
+            if [[ -z "${2:-}" ]]; then
+                echo "Usage: maclogout --end <0-23>" >&2
+                exit 1
+            fi
+            set_config_key END_HOUR "$2"
+            changed=true
+            shift 2
+            ;;
+        *)
+            echo "maclogout: unknown option '$1'. Try --help." >&2
+            exit 1
+            ;;
+    esac
+done
+
+$changed && exit 0
 
 # ── Functions ──────────────────────────────────────────
 

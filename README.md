@@ -17,36 +17,40 @@ A LaunchDaemon (root) runs every 60 seconds:
 ## Install
 
 ```bash
-brew tap <user>/maclogout
+brew tap ilnazziiazi/maclogout
 brew install maclogout
-```
-
-## Post-install
-
-```bash
-# Install and start the daemon
-sudo cp /opt/homebrew/opt/maclogout/launchd/com.maclogout.plist /Library/LaunchDaemons/
+sudo cp $(brew --prefix)/opt/maclogout/launchd/com.maclogout.plist /Library/LaunchDaemons/
 sudo launchctl load /Library/LaunchDaemons/com.maclogout.plist
-
-# Monitor
-tail -f /var/log/maclogout.log
 ```
 
 ## Configuration
 
-Edit `/opt/homebrew/etc/maclogout/config`:
-
+```bash
+maclogout --show              # view current config
+sudo maclogout --start 23     # set start hour
+sudo maclogout --end 6        # set end hour
+maclogout --path              # show config file location
 ```
-START_HOUR=22   # Hour to start forcing logout (0–23)
-END_HOUR=5      # Hour to stop (0–23). If < START_HOUR, wraps past midnight
+
+After changes, restart the daemon:
+```bash
+sudo launchctl unload /Library/LaunchDaemons/com.maclogout.plist
+sudo launchctl load /Library/LaunchDaemons/com.maclogout.plist
 ```
 
-## Stop / Uninstall
+## Logs
+
+```bash
+tail -f /var/log/maclogout.log
+```
+
+## Uninstall
 
 ```bash
 sudo launchctl unload /Library/LaunchDaemons/com.maclogout.plist
+sudo rm /Library/LaunchDaemons/com.maclogout.plist
 brew uninstall maclogout
-brew untap <user>/maclogout
+brew untap ilnazziiazi/maclogout
 ```
 
 ## License
