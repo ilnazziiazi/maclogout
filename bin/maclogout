@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# maclogout — force-logout during configured nighttime window
+# maclogout — lock screen during configured nighttime window
 # Runs as LaunchDaemon every 60 seconds as root.
 #
 
@@ -13,7 +13,7 @@ LOG_FILE="/var/log/maclogout.log"
 # ── Flag handling ──────────────────────────────────────
 
 usage() {
-    echo "maclogout — force-logout during configured nighttime window"
+    echo "maclogout — lock screen during configured nighttime window"
     echo ""
     echo "Usage:"
     echo "  maclogout                  Run a check tick (called by daemon)"
@@ -146,7 +146,7 @@ get_console_user() {
     /usr/bin/stat -f "%Su" /dev/console 2>/dev/null
 }
 
-force_logout() {
+lock_screen() {
     local console_user="$1"
     local uid
 
@@ -156,22 +156,24 @@ force_logout() {
         return 0  # root on console — don't touch
     fi
 
-    log_msg "Forcing logout for user '$console_user' (uid=$uid)"
+    log_msg "Locking screen for user '$console_user' (uid=$uid)"
 
-    # Method 1: unload GUI session via launchctl
-    if /bin/launchctl bootout "gui/$uid" 2>/dev/null; then
-        log_msg "Logout via launchctl bootout succeeded"
+    # CGSession -suspend = Lock Screen (Ctrl+Cmd+Q equivalent)
+    # Keeps all apps running, shows login screen
+    if /bin/launchctl asuser "$uid" \
+        /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend 2>/dev/null; then
+        log_msg "Screen locked via CGSession -suspend"
         return 0
     fi
 
-    # Method 2: AppleScript via launchctl asuser
-    if /bin/launchctl asuser "$uid" /usr/bin/osascript \
-        -e 'tell application "System Events" to log out' 2>/dev/null; then
-        log_msg "Logout via osascript succeeded"
+    # Fallback: put displays to sleep (triggers lock if password is required)
+    log_msg "CGSession failed, trying pmset displaysleepnow"
+    if /usr/bin/pmset displaysleepnow 2>/dev/null; then
+        log_msg "Screen locked via pmset displaysleepnow"
         return 0
     fi
 
-    log_msg "WARNING: all logout methods failed for user '$console_user'"
+    log_msg "WARNING: all lock methods failed for user '$console_user'"
     return 1
 }
 
@@ -196,7 +198,7 @@ if is_in_logout_window; then
     fi
 
     log_msg "Console user: $console_user"
-    force_logout "$console_user"
+    lock_screen "$console_user"
 else
     log_msg "Outside logout window, nothing to do"
 fi
