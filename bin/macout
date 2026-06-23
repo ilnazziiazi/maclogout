@@ -1,28 +1,28 @@
 #!/bin/bash
 #
-# maclogout — lock screen during configured nighttime window
+# macout — lock screen during configured nighttime window
 # Runs as LaunchDaemon every 60 seconds as root.
 #
 
 set -euo pipefail
 
 VERSION="1.0.0"
-CONFIG_FILE="@@HOMEBREW_ETC@@/maclogout/config"
-LOG_FILE="/var/log/maclogout.log"
+CONFIG_FILE="@@HOMEBREW_ETC@@/macout/config"
+LOG_FILE="/var/log/macout.log"
 
 # ── Flag handling ──────────────────────────────────────
 
 usage() {
-    echo "maclogout — lock screen during configured nighttime window"
+    echo "macout — lock screen during configured nighttime window"
     echo ""
     echo "Usage:"
-    echo "  maclogout                  Run a check tick (called by daemon)"
-    echo "  maclogout --show           Show current configuration"
-    echo "  maclogout --start <hour>   Set START_HOUR (requires sudo)"
-    echo "  maclogout --end <hour>     Set END_HOUR (requires sudo)"
-    echo "  maclogout --path           Show config file path"
-    echo "  maclogout --version        Print version"
-    echo "  maclogout --help           This help"
+    echo "  macout                  Run a check tick (called by daemon)"
+    echo "  macout --show           Show current configuration"
+    echo "  macout --start <hour>   Set START_HOUR (requires sudo)"
+    echo "  macout --end <hour>     Set END_HOUR (requires sudo)"
+    echo "  macout --path           Show config file path"
+    echo "  macout --version        Print version"
+    echo "  macout --help           This help"
     echo ""
     echo "Config: $CONFIG_FILE"
 }
@@ -48,7 +48,7 @@ changed=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --version)
-            echo "maclogout $VERSION"
+            echo "macout $VERSION"
             exit 0
             ;;
         --help|-h)
@@ -69,7 +69,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --start)
             if [[ -z "${2:-}" ]]; then
-                echo "Usage: maclogout --start <0-23>" >&2
+                echo "Usage: macout --start <0-23>" >&2
                 exit 1
             fi
             set_config_key START_HOUR "$2"
@@ -78,7 +78,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --end)
             if [[ -z "${2:-}" ]]; then
-                echo "Usage: maclogout --end <0-23>" >&2
+                echo "Usage: macout --end <0-23>" >&2
                 exit 1
             fi
             set_config_key END_HOUR "$2"
@@ -86,7 +86,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         *)
-            echo "maclogout: unknown option '$1'. Try --help." >&2
+            echo "macout: unknown option '$1'. Try --help." >&2
             exit 1
             ;;
     esac
@@ -180,11 +180,11 @@ lock_screen() {
 # ── Main ───────────────────────────────────────────────
 
 if [[ "$(id -u)" -ne 0 ]]; then
-    echo "maclogout: must run as root. Re-running with sudo..." >&2
+    echo "macout: must run as root. Re-running with sudo..." >&2
     exec sudo "$0" "$@"
 fi
 
-log_msg "=== maclogout tick ==="
+log_msg "=== macout tick ==="
 load_config
 
 if is_in_logout_window; then

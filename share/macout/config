@@ -1,4 +1,4 @@
-# maclogout configuration
+# macout configuration
 # Format: KEY=VALUE, lines starting with # are comments
 
 # Hour to start the logout window (0-23)
@@ -9,4 +9,4 @@ START_HOUR=22
 END_HOUR=5
 
 # Path to log file
-LOG_FILE=/var/log/maclogout.log
+LOG_FILE=/var/log/macout.log

@@ -1,13 +1,13 @@
-# maclogout
+# macout
 
-Force-logout scheduler for macOS. Logs out the current GUI user during a configurable nighttime window and prevents re-login until the window ends.
+Lock screen scheduler for macOS. Locks the screen during a configurable nighttime window and prevents unlocking until the window ends.
 
 ## How It Works
 
-A LaunchDaemon (root) runs every 60 seconds:
+A LaunchDaemon (root) runs every second:
 - Checks if current time is inside the configured window (default: 22:00–05:00)
-- If inside window and a GUI user is logged in → forces logout
-- If user logs back in during the window → logs them out again on the next tick
+- If inside window and screen is unlocked → locks screen (Ctrl+Cmd+Q equivalent)
+- All apps keep running in the background
 
 ## Requirements
 
@@ -17,40 +17,40 @@ A LaunchDaemon (root) runs every 60 seconds:
 ## Install
 
 ```bash
-brew tap ilnazziiazi/maclogout
-brew install maclogout
-sudo cp $(brew --prefix)/opt/maclogout/launchd/com.maclogout.plist /Library/LaunchDaemons/
-sudo launchctl load /Library/LaunchDaemons/com.maclogout.plist
+brew tap ilnazziiazi/macout
+brew install macout
+sudo cp $(brew --prefix)/opt/macout/launchd/com.macout.plist /Library/LaunchDaemons/
+sudo launchctl load /Library/LaunchDaemons/com.macout.plist
 ```
 
 ## Configuration
 
 ```bash
-maclogout --show              # view current config
-sudo maclogout --start 23     # set start hour
-sudo maclogout --end 6        # set end hour
-maclogout --path              # show config file location
+macout --show              # view current config
+sudo macout --start 23     # set start hour
+sudo macout --end 6        # set end hour
+macout --path              # show config file location
 ```
 
 After changes, restart the daemon:
 ```bash
-sudo launchctl unload /Library/LaunchDaemons/com.maclogout.plist
-sudo launchctl load /Library/LaunchDaemons/com.maclogout.plist
+sudo launchctl unload /Library/LaunchDaemons/com.macout.plist
+sudo launchctl load /Library/LaunchDaemons/com.macout.plist
 ```
 
 ## Logs
 
 ```bash
-tail -f /var/log/maclogout.log
+tail -f /var/log/macout.log
 ```
 
 ## Uninstall
 
 ```bash
-sudo launchctl unload /Library/LaunchDaemons/com.maclogout.plist
-sudo rm /Library/LaunchDaemons/com.maclogout.plist
-brew uninstall maclogout
-brew untap ilnazziiazi/maclogout
+sudo launchctl unload /Library/LaunchDaemons/com.macout.plist
+sudo rm /Library/LaunchDaemons/com.macout.plist
+brew uninstall macout
+brew untap ilnazziiazi/macout
 ```
 
 ## License

@@ -4,19 +4,19 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.maclogout</string>
+    <string>com.macout</string>
     <key>ProgramArguments</key>
     <array>
-        <string>@@HOMEBREW_PREFIX@@/bin/maclogout</string>
+        <string>@@HOMEBREW_PREFIX@@/bin/macout</string>
     </array>
     <key>StartInterval</key>
     <integer>1</integer>
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/var/log/maclogout.log</string>
+    <string>/var/log/macout.log</string>
     <key>StandardErrorPath</key>
-    <string>/var/log/maclogout.log</string>
+    <string>/var/log/macout.log</string>
     <key>UserName</key>
     <string>root</string>
     <key>GroupName</key>
